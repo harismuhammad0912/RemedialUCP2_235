@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LibraryDao {
-    // --- 1. KATEGORI & BUKU DASAR ---
+    // 1. Insert Dasar
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertCategory(category: Category)
 
@@ -22,7 +22,7 @@ interface LibraryDao {
     @Query("SELECT * FROM categories WHERE isDeleted = 0")
     fun getAllCategories(): Flow<List<Category>>
 
-    // --- 2. FITUR REKURSIF (HIRARKI) ---
+    // 2. Query REKURSIF
     @Query("""
         WITH RECURSIVE CategoryHierarchy(id) AS (
             SELECT id FROM categories WHERE id = :categoryId AND isDeleted = 0
@@ -35,18 +35,18 @@ interface LibraryDao {
     """)
     fun getBooksByCategoryRecursive(categoryId: Int): Flow<List<Book>>
 
-    // --- 3. FITUR LOGIKA HAPUS (TRANSACTION & SOFT DELETE) ---
+    // 3. LOGIKA HAPUS (Soft Delete & Transaction)
     @Query("SELECT COUNT(*) FROM books WHERE categoryId = :categoryId AND status = 'Dipinjam' AND isDeleted = 0")
     suspend fun countBorrowedBooks(categoryId: Int): Int
 
     @Query("UPDATE categories SET isDeleted = 1 WHERE id = :categoryId")
     suspend fun softDeleteCategory(categoryId: Int)
 
-    // Opsi Dinamis: Pindahkan buku ke kategori lain
+    // Opsi Dinamis: Pindahkan buku
     @Query("UPDATE books SET categoryId = :newCategoryId WHERE categoryId = :oldCategoryId AND isDeleted = 0")
     suspend fun moveBooksToCategory(oldCategoryId: Int, newCategoryId: Int)
 
-    // Opsi Dinamis: Hapus buku di kategori ini
+    // Opsi Dinamis: Hapus buku
     @Query("UPDATE books SET isDeleted = 1 WHERE categoryId = :categoryId")
     suspend fun softDeleteBooksByCategory(categoryId: Int)
 
@@ -61,20 +61,16 @@ interface LibraryDao {
         }
     }
 
-    // --- 4. FITUR BARU: MANAJEMEN PENULIS & STATUS BUKU (PROFESIONAL) ---
-
-    // Manajemen Penulis
+    // 4. FITUR BARU: MANAJEMEN PENULIS & STATUS BUKU
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAuthor(author: Author)
 
     @Query("SELECT * FROM authors WHERE isDeleted = 0 ORDER BY name ASC")
     fun getAllAuthors(): Flow<List<Author>>
 
-    // Manajemen Buku Global (Untuk Katalog)
     @Query("SELECT * FROM books WHERE isDeleted = 0 ORDER BY title ASC")
     fun getAllBooks(): Flow<List<Book>>
 
-    // Update Status Peminjaman (Check-in/Check-out)
     @Query("UPDATE books SET status = :newStatus WHERE id = :bookId")
     suspend fun updateBookStatus(bookId: Int, newStatus: String)
 }

@@ -44,7 +44,6 @@ class OfflineLibraryRepository(private val libraryDao: LibraryDao) : LibraryRepo
         libraryDao.softDeleteBooksByCategory(categoryId)
     }
 
-    // Implementasi Fitur Baru
     override fun getAllAuthors(): Flow<List<Author>> = libraryDao.getAllAuthors()
 
     override fun getAllBooks(): Flow<List<Book>> = libraryDao.getAllBooks()

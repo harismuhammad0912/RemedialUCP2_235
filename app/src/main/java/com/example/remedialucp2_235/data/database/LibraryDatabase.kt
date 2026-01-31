@@ -6,10 +6,16 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.remedialucp2_235.data.dao.LibraryDao
 import com.example.remedialucp2_235.data.entity.AuditLog
+import com.example.remedialucp2_235.data.entity.Author
 import com.example.remedialucp2_235.data.entity.Book
 import com.example.remedialucp2_235.data.entity.Category
 
-@Database(entities = [Category::class, Book::class, AuditLog::class], version = 1, exportSchema = false)
+// PERBAIKAN: Menambahkan Author::class ke dalam entities
+@Database(
+    entities = [Category::class, Book::class, AuditLog::class, Author::class],
+    version = 2, // Naikkan versi jika error migrasi, atau uninstall app di HP
+    exportSchema = false
+)
 abstract class LibraryDatabase : RoomDatabase() {
     abstract fun libraryDao(): LibraryDao
 
@@ -20,6 +26,8 @@ abstract class LibraryDatabase : RoomDatabase() {
         fun getDatabase(context: Context): LibraryDatabase {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, LibraryDatabase::class.java, "library_db_235")
+                    // Mengizinkan penghancuran data lama jika skema berubah (PENTING SAAT DEV)
+                    .fallbackToDestructiveMigration()
                     .build()
                     .also { Instance = it }
             }
