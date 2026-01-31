@@ -59,7 +59,7 @@ dependencies {
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
     // --------------------------------------------------
-
+    implementation("androidx.navigation:navigation-compose:2.8.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
